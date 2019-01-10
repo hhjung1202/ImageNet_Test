@@ -21,9 +21,8 @@ import vision_model
 import utils
 
 import imagenet_seq
-
-os.environ["IMAGENET"] = '/mnt/datasets/ILSVRC2015/Data/CLS-LOC/'
-os.environ["TENSORPACK_DATASET"] = '/mnt/wjhwang/imagenet/tensorpack/'
+os.environ["IMAGENET"] = '/database/ILSVRC2015/Data/CLS-LOC/'
+os.environ["TENSORPACK_DATASET"] = '/mnt2/disk1/hhjung/imagenet/tensorpack/'
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3' 
 
 model_names = sorted(name for name in models.__dict__
@@ -70,6 +69,8 @@ parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=None, type=int,
                     help='GPU id to use.')
+parser.add_argument('--gpus', default='', type=str,
+                    help='GPU ids(str) to use.')
 parser.add_argument('--save-path', default='', type=str, metavar='PATH',
                     help='path to saving directory (default: none)')
 
