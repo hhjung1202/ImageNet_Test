@@ -115,6 +115,8 @@ def main():
     # optionally resume from a checkpoint
     if args.save_path:
         utils.default_model_dir = args.save_path
+        if not os.path.exists(utils.default_model_dir):
+            os.makedirs(utils.default_model_dir)
 
     if args.resume:
         if os.path.isfile(args.resume):
