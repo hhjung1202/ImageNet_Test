@@ -1,0 +1,1 @@
+nohup python3 main.py -a resnet101 -j 20 /mnt/datasets/ILSVRC2015/Data/CLS-LOC/ 1> resnet101_log.txt 2> err_resnet101.txt &
