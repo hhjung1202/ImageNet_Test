@@ -70,6 +70,8 @@ parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')
 parser.add_argument('--gpu', default=None, type=int,
                     help='GPU id to use.')
+parser.add_argument('--save-path', default='', type=str, metavar='PATH',
+                    help='path to saving directory (default: none)')
 
 best_prec1 = 0
 
@@ -110,6 +112,9 @@ def main():
                                 weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
+    if args.save_path:
+        utils.default_model_dir = args.save_path
+
     if args.resume:
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))
@@ -172,50 +177,82 @@ def main():
 
     utils.init_learning(model.module)
 
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch)
 
-        # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch, is_main=True)
+    # for epoch in range(args.start_epoch, args.epochs):
+    # ****
+    if args.distributed:
+        train_sampler.set_epoch(epoch)
+    adjust_learning_rate(optimizer, epoch)
 
-        # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion, is_main=True)
+    # train for one epoch
+    train(train_loader, model, criterion, optimizer, epoch, is_main=True)
 
-        # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'arch': args.arch,
-            'state_dict': model.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+    # evaluate on validation set
+    prec1 = validate(val_loader, model, criterion, is_main=True)
 
-        # if epoch % 2 == 1:
-            # for i in range(2):
-        utils.switching_learning(model.module)
+    # remember best prec@1 and save checkpoint
+    is_best = prec1 > best_prec1
+    best_prec1 = max(prec1, best_prec1)
+    save_checkpoint({
+        'epoch': epoch + 1,
+        'arch': args.arch,
+        'state_dict': model.state_dict(),
+        'best_prec1': best_prec1,
+        'optimizer' : optimizer.state_dict(),
+    }, is_best)
 
-        train(train_loader, model, criterion, optimizer, epoch, is_main=False)
+    # if epoch % 2 == 1:
+        # for i in range(2):
+    utils.switching_learning(model.module)
 
-        # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion, is_main=False)
+    train(train_loader, model, criterion, optimizer, epoch, is_main=False)
 
-        # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'arch': args.arch,
-            'state_dict': model.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+    # evaluate on validation set
+    prec1 = validate(val_loader, model, criterion, is_main=False)
 
-        utils.switching_learning(model.module)
+    # remember best prec@1 and save checkpoint
+    is_best = prec1 > best_prec1
+    best_prec1 = max(prec1, best_prec1)
+    save_checkpoint({
+        'epoch': epoch + 1,
+        'arch': args.arch,
+        'state_dict': model.state_dict(),
+        'best_prec1': best_prec1,
+        'optimizer' : optimizer.state_dict(),
+    }, is_best)
 
+    utils.switching_learning(model.module)
+    weight_extract(train_loader, model, criterion)
+    # ****
+
+def weight_extract(train_loader, model, criterion):
+    model.train()
+
+    for i, (input, target) in enumerate(train_loader):
+        # measure data loading time
+        if args.gpu is not None:
+            input = input.cuda(args.gpu, non_blocking=True)
+        target = target.cuda(args.gpu, non_blocking=True)
+
+        # compute output
+        output = model(input)
+        loss = criterion(output, target)
+        utils.c = target.view(-1,1) # batch array torch.tensor[128]
+        print('target', utils.c)
+        utils.c = utils.c.type(torch.cuda.FloatTensor)
+        utils.weight_extract(model.module)
+
+        for i in utils.c:
+            print('i', i)
+            for j in i:
+                print('j', j)
+                utils.str_w = utils.str_w + str(j.tolist()) + ','
+            utils.str_w += '\n'
+
+        utils.save_to_csv()
+        utils.str_w = ''
+
+    print('weight extract done')
 
 def train(train_loader, model, criterion, optimizer, epoch, is_main):
     batch_time = AverageMeter()
@@ -331,9 +368,10 @@ def validate(val_loader, model, criterion, is_main):
 
 
 def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
-    torch.save(state, filename)
+    torch.save(state, os.path.join(utils.default_model_dir, filename))
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(os.path.join(utils.default_model_dir, filename)
+            , os.path.join(utils.default_model_dir, 'model_best.pth.tar'))
 
 
 class AverageMeter(object):
