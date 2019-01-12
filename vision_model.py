@@ -26,6 +26,7 @@ class _Gate(nn.Sequential):
         self.fc2 = nn.Linear(reduction, num_route, bias=False)
         self.fc2.weight.data.fill_(0.)
         self.sigmoid = nn.Sigmoid()
+        self.p = None;
 
     def forward(self, x, res):
         

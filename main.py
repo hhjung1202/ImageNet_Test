@@ -240,7 +240,7 @@ def weight_extract(train_loader, model, criterion):
 
         # compute output
         output = model(input)
-        print(model.module)
+        print('p', model.module.layer1.gate.p)
         loss = criterion(output, target)
 
         utils.c = target.view(-1,1) # batch array torch.tensor[128]
