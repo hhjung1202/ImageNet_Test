@@ -226,10 +226,10 @@ def main():
     }, is_best)
 
     utils.switching_learning(model.module)
-    weight_extract(train_loader, model, criterion, optimizer)
+    weight_extract(train_loader, model, criterion)
     # ****
 
-def weight_extract(train_loader, model, criterion, optimizer):
+def weight_extract(train_loader, model, criterion):
     model.train()
 
     for i, (input, target) in enumerate(train_loader):
@@ -240,10 +240,8 @@ def weight_extract(train_loader, model, criterion, optimizer):
 
         # compute output
         output = model(input)
+        print(model.module)
         loss = criterion(output, target)
-
-        prec1, prec5 = accuracy(output, target, topk=(1, 5))
-        optimizer.zero_grad()
 
         utils.c = target.view(-1,1) # batch array torch.tensor[128]
         utils.c = utils.c.type(torch.cuda.FloatTensor)
@@ -317,6 +315,7 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
                       'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                        epoch, i, len(train_loader), batch_time=batch_time,
                        data_time=data_time, loss=losses, top1=top1, top5=top5))
+        break;
 
 
 
