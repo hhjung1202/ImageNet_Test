@@ -101,7 +101,7 @@ def main():
     
     print("=> creating model '{}'".format(args.arch))
     
-    model = vision_model.resnet101()
+    model = vision_model.resnet18()
 
     model = torch.nn.DataParallel(model).cuda()
 

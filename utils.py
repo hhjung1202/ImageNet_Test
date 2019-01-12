@@ -84,6 +84,8 @@ def weight_extract(model):
     if c is not None:
         for child in model.children():
             if hasattr(child, 'phase'):
+                print('child', child)
+                print('child', child.p)
                 c = torch.cat([c, child.p.view(-1,1)], 1)
             elif is_leaf(child):
                 continue
