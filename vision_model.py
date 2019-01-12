@@ -78,7 +78,6 @@ class BasicBlock(nn.Module):
             residual = self.downsample(x)
 
         out = self.gate(out, residual) * 2
-        print('p', self.gate.p)
         out = self.relu(out)
 
         return out
