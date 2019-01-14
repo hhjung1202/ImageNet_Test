@@ -287,15 +287,23 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output, target, topk=(1, 5))
+        print('p2', model.module.layer1[0].gate.p)
         losses.update(loss.item(), input.size(0))
+        print('p3', model.module.layer1[0].gate.p)
         top1.update(prec1[0], input.size(0))
+        print('p4', model.module.layer1[0].gate.p)
         top5.update(prec5[0], input.size(0))
+        print('p5', model.module.layer1[0].gate.p)
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
+        print('p6', model.module.layer1[0].gate.p)
         loss.backward()
+        print('p7', model.module.layer1[0].gate.p)
         optimizer.step()
+        print('p8', model.module.layer1[0].gate.p)
 
+        
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
