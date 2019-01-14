@@ -26,7 +26,6 @@ class _Gate(nn.Sequential):
         self.fc2 = nn.Linear(reduction, num_route, bias=False)
         self.fc2.weight.data.fill_(0.)
         self.sigmoid = nn.Sigmoid()
-        self.p = None;
 
     def forward(self, x, res):
         
@@ -41,8 +40,8 @@ class _Gate(nn.Sequential):
         p = out[:,:1,:,:] # batch, 1, 1, 1
         q = out[:,1:,:,:] # batch, 1, 1, 1
 
-        self.p = p.view(-1) / (p.view(-1) + q.view(-1))
-        print(self.p)
+        t = p.view(-1) / (p.view(-1) + q.view(-1))
+        self.p = t.clone()
         self.z = p / (p + q)
         return x * self.z + res * (1 - self.z)
 
