@@ -42,7 +42,7 @@ class _Gate(nn.Sequential):
         q = out[:,1:,:,:] # batch, 1, 1, 1
 
         self.p = p.view(-1) / (p.view(-1) + q.view(-1))
-        print(self.p.size)
+        print(self.p)
         self.z = p / (p + q)
         return x * self.z + res * (1 - self.z)
 
