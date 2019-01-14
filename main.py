@@ -280,7 +280,11 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
+        print('p--', model.module.layer1[0].gate.p)
+
         output = model(input)
+        print('p-', model.module.layer1[0].gate.p)
+
         loss = criterion(output, target)
         print('model', model.module)
         print('p', model.module.layer1[0].gate.p)
