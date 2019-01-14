@@ -241,7 +241,7 @@ def weight_extract(train_loader, model, criterion):
         # compute output
         output = model(input)
         print('model', model.module)
-        print('layer1', model.module.layer1)
+        print('p', model.module.layer1[0].gate.p)
         loss = criterion(output, target)
 
         utils.c = target.view(-1,1) # batch array torch.tensor[128]
@@ -283,7 +283,7 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
         output = model(input)
         loss = criterion(output, target)
         print('model', model.module)
-        print('layer1', model.module.layer1)
+        print('p', model.module.layer1[0].gate.p)
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output, target, topk=(1, 5))
