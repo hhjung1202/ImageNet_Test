@@ -239,7 +239,7 @@ def weight_extract(train_loader, model, criterion):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output, weights = model(input, target.view(-1,1))
+        output, weights = model(input, weight=target.view(-1,1))
         loss = criterion(output, target)
 
         utils.c = target.view(-1,1) # batch array torch.tensor[128]
@@ -278,7 +278,7 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output = model(input)
+        output = model(input, weight=None)
         loss = criterion(output, target)
 
         # measure accuracy and record loss
@@ -335,7 +335,7 @@ def validate(val_loader, model, criterion, is_main):
             target = target.cuda(args.gpu, non_blocking=True)
 
             # compute output
-            output = model(input)
+            output = model(input, weight=None)
             loss = criterion(output, target)
 
             # measure accuracy and record loss
