@@ -277,6 +277,7 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
+        print('here')
         output = model(input)
         loss = criterion(output, target)
 
