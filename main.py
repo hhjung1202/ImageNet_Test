@@ -274,8 +274,9 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
 
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
+            print(input.size())
         target = target.cuda(args.gpu, non_blocking=True)
-
+        print(target.size())
         # compute output
         utils.str_w = "hello"
         output = model(input)
