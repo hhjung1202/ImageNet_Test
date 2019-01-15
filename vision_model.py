@@ -46,6 +46,7 @@ class _Gate(nn.Sequential):
         q = out[:,1:,:,:] # batch, 1, 1, 1
         
         if is_extract_weight:
+            print(x.size())
             extract_p = p.view(-1) / (p.view(-1) + q.view(-1))
             print(extract_p.size())
             print(utils.c.size())
