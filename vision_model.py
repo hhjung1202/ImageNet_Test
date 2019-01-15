@@ -28,6 +28,7 @@ class _Gate(nn.Sequential):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, data, weight=None):
+        print('gate', weight)
         x = data[0]
         res = data[1]
         
@@ -83,7 +84,9 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out, weight = self.gate([out, residual]) * 2
+        print('basic_block', weight)
+
+        out, weight = self.gate([out, residual], weight=weight) * 2
         out = self.relu(out)
 
         return out, weight
