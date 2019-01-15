@@ -239,14 +239,13 @@ def weight_extract(train_loader, model, criterion):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output, weights = model(input, weight=target.view(-1,1))
+        # utils.c = target.view(-1,1) # batch array torch.tensor[128]
+        # utils.c = utils.c.type(torch.cuda.FloatTensor)
+        # utils.weight_extract(model.module)
+        output, weights = model(input, weight=target.view(-1,1).type(torch.cuda.FloatTensor))
         loss = criterion(output, target)
 
-        utils.c = target.view(-1,1) # batch array torch.tensor[128]
-        utils.c = utils.c.type(torch.cuda.FloatTensor)
-        utils.weight_extract(model.module)
-
-        for i in utils.c:
+        for i in weights:
             print('i', i)
             for j in i:
                 print('j', j)
@@ -278,7 +277,7 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        output = model(input, weight=None)
+        output = model(input)
         loss = criterion(output, target)
 
         # measure accuracy and record loss
@@ -335,7 +334,7 @@ def validate(val_loader, model, criterion, is_main):
             target = target.cuda(args.gpu, non_blocking=True)
 
             # compute output
-            output = model(input, weight=None)
+            output = model(input)
             loss = criterion(output, target)
 
             # measure accuracy and record loss
