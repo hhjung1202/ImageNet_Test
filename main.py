@@ -160,6 +160,10 @@ def main():
          'train', batch_size=args.batch_size, shuffle=(train_sampler is None), 
          num_workers=args.workers, cuda=True)
 
+    train_loader_extract = imagenet_seq.data.Loader(
+         'train', batch_size=args.batch_size, shuffle=False, 
+         num_workers=args.workers, cuda=True)
+
 #    val_loader = torch.utils.data.DataLoader(
 #        datasets.ImageFolder(valdir, transforms.Compose([
 #            transforms.Resize(256),
@@ -226,17 +230,17 @@ def main():
     }, is_best)
 
     utils.switching_learning(model.module)
-    weight_extract(train_loader, model, criterion)
+    weight_extract(train_loader_extract, model, criterion)
     # ****
 
-def weight_extract(train_loader, model, criterion):
+def weight_extract(train_loader_extract, model, criterion):
     model.train()
 
-    for i, (input, target) in enumerate(train_loader):
+    for i, (input, target) in enumerate(train_loader_extract):
         # measure data loading time
-        # if args.gpu is not None:
-        input = input.cuda(0, non_blocking=True)
-        target = target.cuda(0, non_blocking=True)
+        if args.gpu is not None:
+            input = input.cuda(args.gpu, non_blocking=True)
+        target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
         utils.c = target.view(-1,1) # batch array torch.tensor[128]
@@ -274,9 +278,8 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
 
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
-        print(input.size())
         target = target.cuda(args.gpu, non_blocking=True)
-        print(target.size())
+
         # compute output
         utils.str_w = "hello"
         output = model(input)
