@@ -27,7 +27,9 @@ class _Gate(nn.Sequential):
         self.fc2.weight.data.fill_(0.)
         self.sigmoid = nn.Sigmoid()
 
-    def forward(self, x, res, weight=None):
+    def forward(self, data, weight=None):
+        x = data[0]
+        res = data[1]
         
         x_ = self.avg_pool(x)
         res_ = self.avg_pool(res)
@@ -81,7 +83,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out, weight = self.gate(out, residual, weight) * 2
+        out, weight = self.gate([out, residual], weight) * 2
         out = self.relu(out)
 
         return out, weight
@@ -122,7 +124,7 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out, weight = self.gate(out, residual, weight) * 2
+        out, weight = self.gate([out, residual], weight) * 2
         out = self.relu(out)
 
         return out, weight
