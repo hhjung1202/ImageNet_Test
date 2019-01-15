@@ -160,10 +160,6 @@ def main():
          'train', batch_size=args.batch_size, shuffle=(train_sampler is None), 
          num_workers=args.workers, cuda=True)
 
-    train_loader_extract = imagenet_seq.data.Loader(
-         'train', batch_size=args.batch_size,  
-         num_workers=args.workers, cuda=False)
-
 #    val_loader = torch.utils.data.DataLoader(
 #        datasets.ImageFolder(valdir, transforms.Compose([
 #            transforms.Resize(256),
@@ -230,13 +226,13 @@ def main():
     }, is_best)
 
     utils.switching_learning(model.module)
-    weight_extract(train_loader_extract, model, criterion)
+    weight_extract(train_loader, model, criterion)
     # ****
 
-def weight_extract(train_loader_extract, model, criterion):
+def weight_extract(train_loader, model, criterion):
     model.train()
 
-    for i, (input, target) in enumerate(train_loader_extract):
+    for i, (input, target) in enumerate(train_loader):
         # measure data loading time
         if args.gpu is not None:
             input = input.cuda(args.gpu, non_blocking=True)
