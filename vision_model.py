@@ -83,7 +83,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out, weight = self.gate([out, residual], weight=weight) * 2
+        out, weight = self.gate([out, residual]) * 2
         out = self.relu(out)
 
         return out, weight
