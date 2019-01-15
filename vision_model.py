@@ -47,8 +47,8 @@ class _Gate(nn.Sequential):
         
         if is_extract_weight:
             extract_p = p.view(-1) / (p.view(-1) + q.view(-1))
-            print(extract_p.size)
-            print(utils.c.size)
+            print(extract_p.size())
+            print(utils.c.size())
             utils.c = torch.cat([utils.c, extract_p.view(-1,1)], 1)
 
 
