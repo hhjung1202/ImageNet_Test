@@ -46,7 +46,7 @@ class _Gate(nn.Sequential):
         #     weight = torch.cat([weight, t.view(-1,1)], 1)
 
         z = p / (p + q)
-        return x * z + res * (1 - z), weight
+        return x * z + res * (1 - z)
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
