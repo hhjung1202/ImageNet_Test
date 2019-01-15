@@ -235,8 +235,8 @@ def weight_extract(train_loader, model, criterion):
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
         
-        input = input.cuda(args.gpu, non_blocking=False)
-        target = target.cuda(args.gpu, non_blocking=False)
+        input = Variable(input.cuda())
+        target = Variable(target.cuda())
 
         # compute output
         utils.c = target.view(-1,1) # batch array torch.tensor[128]
