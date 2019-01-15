@@ -181,9 +181,6 @@ class ResNet(nn.Module):
         global is_extract_weight
         is_extract_weight = extract_weight
 
-        if is_extract_weight:
-            print(x.size())
-        
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
