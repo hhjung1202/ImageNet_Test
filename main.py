@@ -239,13 +239,13 @@ def weight_extract(train_loader, model, criterion):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        # utils.c = target.view(-1,1) # batch array torch.tensor[128]
-        # utils.c = utils.c.type(torch.cuda.FloatTensor)
+        utils.c = target.view(-1,1) # batch array torch.tensor[128]
+        utils.c = utils.c.type(torch.cuda.FloatTensor)
         # utils.weight_extract(model.module)
-        output, weights = model(input, weight=target.view(-1,1).type(torch.cuda.FloatTensor))
+        output = model(input, extract_weight=True)
         loss = criterion(output, target)
 
-        for i in weights:
+        for i in utils.c:
             print('i', i)
             for j in i:
                 print('j', j)

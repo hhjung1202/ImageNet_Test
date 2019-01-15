@@ -17,6 +17,8 @@ model_urls = {
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
 }
 
+is_extract_weight = False
+
 class _Gate(nn.Sequential):
     phase = 2
     def __init__(self, channels, reduction, num_route):
@@ -30,7 +32,8 @@ class _Gate(nn.Sequential):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x, res):
-        
+        global is_extract_weight
+
         x_ = self.avg_pool(x)
         res_ = self.avg_pool(res)
         out = torch.cat([x_,res_], 1)
@@ -41,9 +44,11 @@ class _Gate(nn.Sequential):
 
         p = out[:,:1,:,:] # batch, 1, 1, 1
         q = out[:,1:,:,:] # batch, 1, 1, 1
+        
+        if is_extract_weight:
+            extract_p = p.view(-1) / (p.view(-1) + q.view(-1))
+            utils.c = torch.cat([utils.c, extract_p.view(-1,1)], 1)
 
-        t = p.view(-1) / (p.view(-1) + q.view(-1))
-        self.p = t.clone()
         self.z = p / (p + q)
         return x * self.z + res * (1 - self.z)
 
@@ -168,14 +173,14 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x, weight = None):
+    def forward(self, x, extract_weight=False):
+        global is_extract_weight
+        is_extract_weight = extract_weight
+        
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-        
-        print(weight)
-        print(utils.str_w)
 
         x = self.layer1(x)
         x = self.layer2(x)
