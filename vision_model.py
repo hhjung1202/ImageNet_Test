@@ -27,8 +27,8 @@ class _Gate(nn.Sequential):
         self.fc2.weight.data.fill_(0.)
         self.sigmoid = nn.Sigmoid()
 
-    def forward(self, x, res, weight=None):
-        print('here5')
+    # def forward(self, x, res, weight=None):
+    def forward(self, x, res):
         x_ = self.avg_pool(x)
         res_ = self.avg_pool(res)
         out = torch.cat([x_,res_], 1)
@@ -42,8 +42,8 @@ class _Gate(nn.Sequential):
 
         t = p.view(-1) / (p.view(-1) + q.view(-1))
         
-        if weight is not None:
-            weight = torch.cat([weight, t.view(-1,1)], 1)
+        # if weight is not None:
+        #     weight = torch.cat([weight, t.view(-1,1)], 1)
 
         z = p / (p + q)
         return x * z + res * (1 - z), weight
@@ -69,7 +69,6 @@ class BasicBlock(nn.Module):
         self.gate = _Gate(channels=planes, reduction=16, num_route=2)
 
     def forward(self, x, weight=None):
-        print('here3')
         residual = x
 
         out = self.conv1(x)
@@ -82,8 +81,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        print('here4')
-        out, weight = self.gate(out, residual, weight) * 2
+        out, weight = self.gate(out, residual) * 2
         out = self.relu(out)
 
         return out, weight
@@ -124,7 +122,7 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out, weight = self.gate(out, residual, weight) * 2
+        out, weight = self.gate(out, residual) * 2
         out = self.relu(out)
 
         return out, weight
@@ -172,14 +170,12 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x, weight=None):
-        print('here1')
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
         
         if weight is None:
-            print('here2')
             x, w = self.layer1(x)
             x, w = self.layer2(x)
             x, w = self.layer3(x)
