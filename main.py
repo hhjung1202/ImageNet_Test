@@ -161,8 +161,8 @@ def main():
          num_workers=args.workers, cuda=True)
 
     train_loader_extract = imagenet_seq.data.Loader(
-         'train', batch_size=args.batch_size, shuffle=False, 
-         num_workers=args.workers, cuda=True)
+         'train', batch_size=args.batch_size,  
+         num_workers=args.workers, cuda=False)
 
 #    val_loader = torch.utils.data.DataLoader(
 #        datasets.ImageFolder(valdir, transforms.Compose([
