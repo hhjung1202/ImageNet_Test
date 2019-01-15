@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+import utils
+
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152']
@@ -27,8 +29,8 @@ class _Gate(nn.Sequential):
         self.fc2.weight.data.fill_(0.)
         self.sigmoid = nn.Sigmoid()
 
-    # def forward(self, x, res, weight=None):
     def forward(self, x, res):
+        
         x_ = self.avg_pool(x)
         res_ = self.avg_pool(res)
         out = torch.cat([x_,res_], 1)
@@ -41,12 +43,9 @@ class _Gate(nn.Sequential):
         q = out[:,1:,:,:] # batch, 1, 1, 1
 
         t = p.view(-1) / (p.view(-1) + q.view(-1))
-        
-        # if weight is not None:
-        #     weight = torch.cat([weight, t.view(-1,1)], 1)
-
-        z = p / (p + q)
-        return x * z + res * (1 - z)
+        self.p = t.clone()
+        self.z = p / (p + q)
+        return x * self.z + res * (1 - self.z)
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
@@ -68,7 +67,7 @@ class BasicBlock(nn.Module):
         self.stride = stride
         self.gate = _Gate(channels=planes, reduction=16, num_route=2)
 
-    def forward(self, x, weight=None):
+    def forward(self, x):
         residual = x
 
         out = self.conv1(x)
@@ -84,7 +83,7 @@ class BasicBlock(nn.Module):
         out = self.gate(out, residual) * 2
         out = self.relu(out)
 
-        return out, weight
+        return out
 
 
 class Bottleneck(nn.Module):
@@ -105,7 +104,7 @@ class Bottleneck(nn.Module):
         self.gate = _Gate(channels=planes * self.expansion, reduction=16, num_route=2)
 
 
-    def forward(self, x, weight=None):
+    def forward(self, x):
         residual = x
 
         out = self.conv1(x)
@@ -122,10 +121,10 @@ class Bottleneck(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out, weight = self.gate(out, residual) * 2
+        out = self.gate(out, residual) * 2
         out = self.relu(out)
 
-        return out, weight
+        return out
 
 
 class ResNet(nn.Module):
@@ -169,29 +168,25 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x, weight=None):
+    def forward(self, x, weight):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
         
-        if weight is None:
-            x, w = self.layer1(x)
-            x, w = self.layer2(x)
-            x, w = self.layer3(x)
-            x, w = self.layer4(x)
+        print(weight)
+        print(utils.str_w)
 
-        else:
-            x, weight = self.layer1(x, weight)
-            x, weight = self.layer2(x, weight)
-            x, weight = self.layer3(x, weight)
-            x, weight = self.layer4(x, weight)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
 
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
 
-        return x, weight
+        return x
 
 
 def resnet18(pretrained=False, **kwargs):
