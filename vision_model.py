@@ -32,7 +32,7 @@ class _Gate(nn.Sequential):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x, res):
-        global is_extract_weight
+        # global is_extract_weight
 
         x_ = self.avg_pool(x)
         res_ = self.avg_pool(res)
@@ -45,12 +45,12 @@ class _Gate(nn.Sequential):
         p = out[:,:1,:,:] # batch, 1, 1, 1
         q = out[:,1:,:,:] # batch, 1, 1, 1
         
-        if is_extract_weight:
-            print(x.size())
-            extract_p = p.view(-1) / (p.view(-1) + q.view(-1))
-            print(extract_p.size())
-            print(utils.c.size())
-            utils.c = torch.cat([utils.c, extract_p.view(-1,1)], 1)
+        # if is_extract_weight:
+        #     print(x.size())
+        #     extract_p = p.view(-1) / (p.view(-1) + q.view(-1))
+        #     print(extract_p.size())
+        #     print(utils.c.size())
+        #     utils.c = torch.cat([utils.c, extract_p.view(-1,1)], 1)
 
 
         self.z = p / (p + q)
@@ -178,8 +178,8 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x, extract_weight=False):
-        global is_extract_weight
-        is_extract_weight = extract_weight
+        # global is_extract_weight
+        # is_extract_weight = extract_weight
 
         x = self.conv1(x)
         x = self.bn1(x)

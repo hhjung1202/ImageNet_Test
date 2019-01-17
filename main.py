@@ -102,7 +102,7 @@ def main():
     
     print("=> creating model '{}'".format(args.arch))
     
-    model = vision_model.resnet18()
+    model = vision_model.resnet101()
 
     model = torch.nn.DataParallel(model).cuda()
 
@@ -182,53 +182,50 @@ def main():
     utils.init_learning(model.module)
 
 
-    # for epoch in range(args.start_epoch, args.epochs):
-    epoch = 0
-    # ****
-    if args.distributed:
-        train_sampler.set_epoch(epoch)
-    adjust_learning_rate(optimizer, epoch)
+    for epoch in range(args.start_epoch, args.epochs):
+        if args.distributed:
+            train_sampler.set_epoch(epoch)
+        adjust_learning_rate(optimizer, epoch)
 
-    # train for one epoch
-    train(train_loader, model, criterion, optimizer, epoch, is_main=True)
+        # train for one epoch
+        train(train_loader, model, criterion, optimizer, epoch, is_main=True)
 
-    # evaluate on validation set
-    prec1 = validate(val_loader, model, criterion, is_main=True)
+        # evaluate on validation set
+        prec1 = validate(val_loader, model, criterion, is_main=True)
 
-    # remember best prec@1 and save checkpoint
-    is_best = prec1 > best_prec1
-    best_prec1 = max(prec1, best_prec1)
-    save_checkpoint({
-        'epoch': epoch + 1,
-        'arch': args.arch,
-        'state_dict': model.state_dict(),
-        'best_prec1': best_prec1,
-        'optimizer' : optimizer.state_dict(),
-    }, is_best)
+        # remember best prec@1 and save checkpoint
+        is_best = prec1 > best_prec1
+        best_prec1 = max(prec1, best_prec1)
+        save_checkpoint({
+            'epoch': epoch + 1,
+            'arch': args.arch,
+            'state_dict': model.state_dict(),
+            'best_prec1': best_prec1,
+            'optimizer' : optimizer.state_dict(),
+        }, is_best)
 
-    # if epoch % 2 == 1:
-        # for i in range(2):
-    utils.switching_learning(model.module)
+        # if epoch % 2 == 1:
+            # for i in range(2):
+        utils.switching_learning(model.module)
 
-    train(train_loader, model, criterion, optimizer, epoch, is_main=False)
+        train(train_loader, model, criterion, optimizer, epoch, is_main=False)
 
-    # evaluate on validation set
-    prec1 = validate(val_loader, model, criterion, is_main=False)
+        # evaluate on validation set
+        prec1 = validate(val_loader, model, criterion, is_main=False)
 
-    # remember best prec@1 and save checkpoint
-    is_best = prec1 > best_prec1
-    best_prec1 = max(prec1, best_prec1)
-    save_checkpoint({
-        'epoch': epoch + 1,
-        'arch': args.arch,
-        'state_dict': model.state_dict(),
-        'best_prec1': best_prec1,
-        'optimizer' : optimizer.state_dict(),
-    }, is_best)
+        # remember best prec@1 and save checkpoint
+        is_best = prec1 > best_prec1
+        best_prec1 = max(prec1, best_prec1)
+        save_checkpoint({
+            'epoch': epoch + 1,
+            'arch': args.arch,
+            'state_dict': model.state_dict(),
+            'best_prec1': best_prec1,
+            'optimizer' : optimizer.state_dict(),
+        }, is_best)
 
-    utils.switching_learning(model.module)
-    weight_extract(train_loader, model, criterion)
-    # ****
+        utils.switching_learning(model.module)
+    # weight_extract(train_loader, model, criterion)
 
 def weight_extract(train_loader, model, criterion):
     model.train()
