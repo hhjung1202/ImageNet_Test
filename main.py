@@ -327,8 +327,6 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
                       'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                        epoch, i, len(train_loader), batch_time=batch_time,
                        data_time=data_time, loss=losses, top1=top1, top5=top5))
-        break;
-
 
 
 def validate(val_loader, model, criterion, is_main):
