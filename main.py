@@ -105,13 +105,13 @@ def main():
     
     print("=> creating model '{}'".format(args.arch))
     
-    if args.arch is "resnet18":
+    if args.arch == "resnet18":
         model = vision_model.resnet18()
         print('resnet18')
-    elif args.arch is "resnet50":
+    elif args.arch == "resnet50":
         model = vision_model.resnet50()
         print('resnet50')
-    elif args.arch is "resnet101":
+    elif args.arch == "resnet101":
         model = vision_model.resnet101()
         print('resnet101')
     else:
