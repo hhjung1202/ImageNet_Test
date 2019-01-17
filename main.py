@@ -107,16 +107,12 @@ def main():
     
     if args.arch == "resnet18":
         model = vision_model.resnet18()
-        print('resnet18')
     elif args.arch == "resnet50":
         model = vision_model.resnet50()
-        print('resnet50')
     elif args.arch == "resnet101":
         model = vision_model.resnet101()
-        print('resnet101')
     else:
         model = vision_model.resnet18()
-    return;
 
     model = torch.nn.DataParallel(model).cuda()
 
