@@ -1,1 +1,1 @@
-nohup python3 main.py -a resnet101 -j 20 --save-path ../result/imagenet_test/ /database/ILSVRC2015/Data/CLS-LOC/ 1> resnet_log.txt 2> err_resnet.txt &
+nohup python3 main.py -a resnet50 -j 20 --gpus 4,5,6,7 --save-path ../result/imagenet_101/ /database/ILSVRC2015/Data/CLS-LOC/ 1> resnet50_log.txt 2> err_resnet50.txt &

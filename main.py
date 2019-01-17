@@ -24,7 +24,6 @@ import utils
 import imagenet_seq
 os.environ["IMAGENET"] = '/database/ILSVRC2015/Data/CLS-LOC/'
 os.environ["TENSORPACK_DATASET"] = '/mnt2/disk1/hhjung/imagenet/tensorpack/'
-os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3' 
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -76,7 +75,10 @@ parser.add_argument('--save-path', default='', type=str, metavar='PATH',
                     help='path to saving directory (default: none)')
 
 best_prec1 = 0
-
+if args.gpus:
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
+else:
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 
 def main():
     global args, best_prec1
@@ -181,6 +183,7 @@ def main():
 
     utils.init_learning(model.module)
 
+    work_counter = 0
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
@@ -204,27 +207,32 @@ def main():
             'optimizer' : optimizer.state_dict(),
         }, is_best)
 
+        work_counter += 1
+
         # if epoch % 2 == 1:
             # for i in range(2):
-        utils.switching_learning(model.module)
+        if work_counter == 2:
+            utils.switching_learning(model.module)
 
-        train(train_loader, model, criterion, optimizer, epoch, is_main=False)
+            train(train_loader, model, criterion, optimizer, epoch, is_main=False)
 
-        # evaluate on validation set
-        prec1 = validate(val_loader, model, criterion, is_main=False)
+            # evaluate on validation set
+            prec1 = validate(val_loader, model, criterion, is_main=False)
 
-        # remember best prec@1 and save checkpoint
-        is_best = prec1 > best_prec1
-        best_prec1 = max(prec1, best_prec1)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'arch': args.arch,
-            'state_dict': model.state_dict(),
-            'best_prec1': best_prec1,
-            'optimizer' : optimizer.state_dict(),
-        }, is_best)
+            # remember best prec@1 and save checkpoint
+            is_best = prec1 > best_prec1
+            best_prec1 = max(prec1, best_prec1)
+            save_checkpoint({
+                'epoch': epoch + 1,
+                'arch': args.arch,
+                'state_dict': model.state_dict(),
+                'best_prec1': best_prec1,
+                'optimizer' : optimizer.state_dict(),
+            }, is_best)
 
-        utils.switching_learning(model.module)
+            utils.switching_learning(model.module)
+
+            work_counter = 0
     # weight_extract(train_loader, model, criterion)
 
 def weight_extract(train_loader, model, criterion):
@@ -275,7 +283,6 @@ def train(train_loader, model, criterion, optimizer, epoch, is_main):
         target = target.cuda(args.gpu, non_blocking=True)
 
         # compute output
-        utils.str_w = "hello"
         output = model(input)
         loss = criterion(output, target)
 
