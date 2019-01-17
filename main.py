@@ -75,14 +75,15 @@ parser.add_argument('--save-path', default='', type=str, metavar='PATH',
                     help='path to saving directory (default: none)')
 
 best_prec1 = 0
-if args.gpus:
-    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
-else:
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 
 def main():
     global args, best_prec1
     args = parser.parse_args()
+    if args.gpus:
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
+    else:
+        os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
+
 
     if args.seed is not None:
         random.seed(args.seed)
@@ -104,7 +105,14 @@ def main():
     
     print("=> creating model '{}'".format(args.arch))
     
-    model = vision_model.resnet101()
+    if args.arch is "resnet18":
+        model = vision_model.resnet18()
+    elif args.arch is "resnet50":
+        model = vision_model.resnet50()
+    elif args.arch is "resnet101":
+        model = vision_model.resnet101()
+    else:
+        model = vision_model.resnet18()
 
     model = torch.nn.DataParallel(model).cuda()
 
